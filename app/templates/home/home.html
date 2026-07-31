@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Vecxus · Bunkering Strategy Optimisation{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container py-5">
+    <div class="row align-items-center g-4 py-lg-4">
+      <div class="col-lg-7">
+        <span class="eyebrow">Vector Nexus</span>
+        <h1>Make smarter vessel fuel purchasing decisions.</h1>
+        <p class="lead">Vecxus helps shipping teams explore where, when, and how much fuel to purchase using operational data.</p>
+        <a class="btn btn-light" href="{{ url_for('workspace') }}">Open workspace</a>
+      </div>
+      <div class="col-lg-5">
+        <div class="question-card">
+          <span>Core decision</span>
+          <p>Where should a vessel bunker, when should it bunker, and how much should it purchase?</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container py-5" id="modules">
+  <div class="section-heading">
+    <span>Project skeleton</span>
+    <h2>Feature areas for the team</h2>
+    <p>These placeholders can grow into separate pages as the prototype develops.</p>
+  </div>
+  <div class="row g-4 mt-1">
+    {% for icon, title, copy in [
+      ('fuel-pump', 'Fuel market data', 'Compare bunker prices and availability across ports.'),
+      ('ship', 'Vessel & voyage', 'Model consumption, routes, schedules, and constraints.'),
+      ('sliders', 'Optimisation', 'Recommend where, when, and how much fuel to purchase.'),
+      ('bezier2', 'Scenario testing', 'Explore price changes, route changes, and delays.')
+    ] %}
+    <div class="col-md-6 col-xl-3">
+      <article class="module-card h-100"><i class="bi bi-{{ icon }}"></i><h3>{{ title }}</h3><p>{{ copy }}</p><span class="placeholder-label">Feature placeholder</span></article>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
