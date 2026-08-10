@@ -1,0 +1,32 @@
+[
+  {
+    "port_name": "Singapore",
+    "country": "Singapore",
+    "unlocode": "SGSIN",
+    "supported_fuels": ["VLSFO", "LNG", "Biofuel Blend"],
+    "evidence": "MPA publishes bunker statistics, licensed providers, and dedicated LNG and biofuel bunkering information.",
+    "activity_indicator": "Major bunkering hub",
+    "inventory_status": "Not connected",
+    "supplier_count": null,
+    "last_verified": "2026-08-10",
+    "source_name": "Maritime and Port Authority of Singapore",
+    "source_url": "https://www.mpa.gov.sg/port-marine-ops/marine-services/bunkering",
+    "api_name": null,
+    "api_url": null
+  },
+  {
+    "port_name": "Shanghai",
+    "country": "China",
+    "unlocode": "CNSHA",
+    "supported_fuels": ["VLSFO", "LNG", "Biofuel Blend"],
+    "evidence": "Shanghai government sources document regular low-sulphur fuel oil and LNG bunkering, plus expanding biofuel and methanol capability.",
+    "activity_indicator": "High documented activity",
+    "inventory_status": "Not connected",
+    "supplier_count": null,
+    "last_verified": "2026-08-10",
+    "source_name": "Shanghai Municipal Government",
+    "source_url": "https://english.shanghai.gov.cn/en-GreenShipping-ShippingCenter/20260121/3fea967bf748466799d5a7791cf1d3c9.html",
+    "api_name": null,
+    "api_url": null
+  }
+]
