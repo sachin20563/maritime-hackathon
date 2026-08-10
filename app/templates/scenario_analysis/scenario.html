@@ -1,0 +1,859 @@
+{% extends "base.html" %}
+
+{% block title %}
+Voyage Scenario & Dynamic Risk Analysis
+{% endblock %}
+
+{% block content %}
+
+<div class="scenario-workspace">
+
+    <!-- ===================================================== -->
+    <!-- HEADER -->
+    <!-- ===================================================== -->
+
+    <div class="scenario-header">
+
+        <div>
+
+            <span class="scenario-eyebrow">
+                VOYAGE SCENARIO & DYNAMIC RISK ANALYSIS
+            </span>
+
+            <h1>
+                {{ vessel.vessel_name }}
+            </h1>
+
+            <div class="scenario-route-label">
+                {{ vessel.origin }}
+                <i class="bi bi-arrow-right"></i>
+                {{ vessel.destination }}
+            </div>
+
+            <div class="scenario-meta">
+
+                <span>
+                    <i class="bi bi-upc-scan"></i>
+                    IMO {{ vessel.imo }}
+                </span>
+
+                <span>
+                    <i class="bi bi-fuel-pump"></i>
+                    Next bunker:
+                    {{ vessel.next_bunkering_port }}
+                </span>
+
+                <span class="live-indicator">
+                    <span></span>
+                    LIVE INTELLIGENCE
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="scenario-header-actions">
+
+            <a
+                class="btn btn-outline-light"
+                href="{{ url_for(
+                    'vessel_detail',
+                    vessel_id=vessel.vessel_id
+                ) }}"
+            >
+                <i class="bi bi-arrow-left"></i>
+                Back to vessel
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- LIVE SIGNALS -->
+    <!-- ===================================================== -->
+
+    <div class="live-signal-grid">
+
+        <div class="live-card weather">
+
+            <div class="live-card-icon">
+                <i class="bi bi-cloud-sun"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    WEATHER
+                </span>
+
+                <strong id="weather-value">
+                    Loading...
+                </strong>
+
+                <small id="weather-detail">
+                    OpenWeather
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="live-card">
+
+            <div class="live-card-icon">
+                <i class="bi bi-bar-chart"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    OIL MARKET
+                </span>
+
+                <strong id="oil-value">
+                    Loading...
+                </strong>
+
+                <small id="oil-detail">
+                    OilPriceAPI
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="live-card">
+
+            <div class="live-card-icon">
+                <i class="bi bi-calendar3"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    SCHEDULE
+                </span>
+
+                <strong id="schedule-value">
+                    Loading...
+                </strong>
+
+                <small id="schedule-detail">
+                    Schedule API
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="live-card">
+
+            <div class="live-card-icon danger">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    DISRUPTION SIGNALS
+                </span>
+
+                <strong id="news-value">
+                    Loading...
+                </strong>
+
+                <small id="news-detail">
+                    NewsAPI
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- LIVE SIGNAL ACTION BAR -->
+    <!-- ===================================================== -->
+
+    <div class="live-action-bar">
+
+        <div>
+
+            <strong>
+                <i class="bi bi-broadcast"></i>
+                Live operating conditions
+            </strong>
+
+            <span id="live-summary">
+                Pulling weather, market, schedule and disruption signals...
+            </span>
+
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <button
+                id="refresh-live"
+                class="btn btn-outline-primary btn-sm"
+            >
+                <i class="bi bi-arrow-clockwise"></i>
+                Refresh
+            </button>
+
+            <button
+                id="apply-live"
+                class="btn btn-primary btn-sm"
+                disabled
+            >
+                <i class="bi bi-magic"></i>
+                Apply live signals
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- MAIN WORKSPACE -->
+    <!-- ===================================================== -->
+
+    <div class="scenario-main-grid">
+
+
+        <!-- MAP -->
+        <section class="scenario-panel">
+
+            <div class="scenario-panel-header">
+
+                <div>
+
+                    <span class="section-kicker">
+                        ROUTE INTELLIGENCE
+                    </span>
+
+                    <h2>
+                        Baseline vs scenario route
+                    </h2>
+
+                </div>
+
+                <span class="map-source">
+                    <i class="bi bi-map"></i>
+                    OpenStreetMap
+                </span>
+
+            </div>
+
+            <div
+                id="scenario-map"
+                class="scenario-map"
+            ></div>
+
+            <div class="route-legend">
+
+                <span>
+                    <i class="legend-dot origin"></i>
+                    Origin
+                </span>
+
+                <span>
+                    <i class="legend-dot bunker"></i>
+                    Current bunker
+                </span>
+
+                <span>
+                    <i class="legend-dot alternative"></i>
+                    Scenario bunker
+                </span>
+
+                <span>
+                    <i class="legend-dot destination"></i>
+                    Destination
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- CONTROLS -->
+
+        <section class="scenario-panel controls-panel">
+
+            <div class="scenario-panel-header">
+
+                <div>
+
+                    <span class="section-kicker">
+                        SCENARIO CONTROLS
+                    </span>
+
+                    <h2>
+                        Change operating conditions
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <form id="scenario-form">
+
+
+                <div class="control-group">
+
+                    <label>
+                        Weather
+                    </label>
+
+                    <select
+                        name="weather"
+                        class="form-select"
+                    >
+                        <option>None</option>
+                        <option>Mild</option>
+                        <option selected>
+                            Moderate
+                        </option>
+                        <option>Severe</option>
+                    </select>
+
+                </div>
+
+
+                <div class="control-group">
+
+                    <label>
+                        Port congestion
+                    </label>
+
+                    <select
+                        name="congestion"
+                        class="form-select"
+                    >
+                        <option>None</option>
+                        <option>Low</option>
+                        <option selected>
+                            Medium
+                        </option>
+                        <option>High</option>
+                    </select>
+
+                </div>
+
+
+                <div class="control-group">
+
+                    <label>
+                        Geopolitical exposure
+                    </label>
+
+                    <select
+                        name="geopolitical"
+                        class="form-select"
+                    >
+                        <option selected>None</option>
+                        <option>Medium</option>
+                        <option>High</option>
+                    </select>
+
+                </div>
+
+
+                <div class="control-group">
+
+                    <label>
+                        Port availability
+                    </label>
+
+                    <select
+                        name="port_status"
+                        class="form-select"
+                    >
+                        <option selected>Open</option>
+                        <option>Reduced</option>
+                        <option>Closed</option>
+                    </select>
+
+                </div>
+
+
+                <div class="control-group">
+
+                    <label>
+                        Fuel supply
+                    </label>
+
+                    <select
+                        name="fuel_supply"
+                        class="form-select"
+                    >
+                        <option selected>
+                            Available
+                        </option>
+
+                        <option>
+                            Constrained
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="two-column-controls">
+
+                    <div class="control-group">
+
+                        <label>
+                            Fuel price change
+                        </label>
+
+                        <div class="input-group">
+
+                            <input
+                                name="fuel_price_change_pct"
+                                type="number"
+                                value="8"
+                                min="-30"
+                                max="50"
+                                step="1"
+                                class="form-control"
+                            >
+
+                            <span class="input-group-text">
+                                %
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="control-group">
+
+                        <label>
+                            Additional delay
+                        </label>
+
+                        <div class="input-group">
+
+                            <input
+                                name="delay_days"
+                                type="number"
+                                value="0"
+                                min="0"
+                                max="7"
+                                step="0.1"
+                                class="form-control"
+                            >
+
+                            <span class="input-group-text">
+                                days
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="control-group">
+
+                    <label>
+                        Alternative bunker port
+                    </label>
+
+                    <select
+                        name="alternative_bunkering_port"
+                        class="form-select"
+                    >
+
+                        <option selected>
+                            {{ vessel.next_bunkering_port }}
+                        </option>
+
+                        <option>
+                            Singapore
+                        </option>
+
+                        <option>
+                            Shanghai
+                        </option>
+
+                        <option>
+                            Busan
+                        </option>
+
+                        <option>
+                            Hong Kong
+                        </option>
+
+                        <option>
+                            Port Klang
+                        </option>
+
+                        <option>
+                            Tanjung Pelepas
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary scenario-run-button"
+                >
+                    <i class="bi bi-play-fill"></i>
+                    Run scenario
+                </button>
+
+
+            </form>
+
+        </section>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- COMPARISON -->
+    <!-- ===================================================== -->
+
+    <section class="scenario-panel comparison-panel">
+
+        <div class="scenario-panel-header">
+
+            <div>
+
+                <span class="section-kicker">
+                    DECISION COMPARISON
+                </span>
+
+                <h2>
+                    Baseline vs scenario
+                </h2>
+
+            </div>
+
+            <span
+                id="risk-badge"
+                class="risk-badge"
+            >
+                Not calculated
+            </span>
+
+        </div>
+
+
+        <div class="comparison-grid">
+
+            <div class="comparison-card">
+
+                <span>
+                    PROJECTED COST
+                </span>
+
+                <strong id="kpi-cost">
+                    —
+                </strong>
+
+                <small id="kpi-cost-change">
+                    —
+                </small>
+
+            </div>
+
+
+            <div class="comparison-card">
+
+                <span>
+                    FUEL CONSUMPTION
+                </span>
+
+                <strong id="kpi-fuel">
+                    —
+                </strong>
+
+                <small id="kpi-fuel-change">
+                    —
+                </small>
+
+            </div>
+
+
+            <div class="comparison-card">
+
+                <span>
+                    VOYAGE TIME
+                </span>
+
+                <strong id="kpi-time">
+                    —
+                </strong>
+
+                <small id="kpi-time-change">
+                    —
+                </small>
+
+            </div>
+
+
+            <div class="comparison-card">
+
+                <span>
+                    ARRIVAL RESERVE
+                </span>
+
+                <strong id="kpi-reserve">
+                    —
+                </strong>
+
+                <small id="kpi-reserve-change">
+                    —
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table scenario-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Metric</th>
+                        <th>Baseline</th>
+                        <th>Scenario</th>
+                        <th>Change</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="comparison-body">
+
+                    <tr>
+                        <td colspan="4">
+                            Run a scenario to compare outcomes.
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- ===================================================== -->
+    <!-- RISK + AI -->
+    <!-- ===================================================== -->
+
+    <div class="scenario-bottom-grid">
+
+
+        <!-- RISK -->
+
+        <section class="scenario-panel">
+
+            <div class="scenario-panel-header">
+
+                <div>
+
+                    <span class="section-kicker">
+                        DYNAMIC RISK
+                    </span>
+
+                    <h2>
+                        Scenario risk assessment
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="risk-score-container">
+
+                <div
+                    id="risk-score-circle"
+                    class="risk-score-circle"
+                >
+
+                    <strong id="risk-score">
+                        —
+                    </strong>
+
+                    <span>
+                        risk
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <h3 id="risk-title">
+                        Awaiting scenario
+                    </h3>
+
+                    <p id="risk-method">
+                        Risk is calculated using transparent
+                        scenario rules.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="risk-reasons"
+                class="risk-reasons"
+            ></div>
+
+        </section>
+
+
+        <!-- AI -->
+
+        <section class="scenario-panel ai-panel">
+
+            <div class="scenario-panel-header">
+
+                <div>
+
+                    <span class="section-kicker">
+                        AI-ASSISTED DECISION SUPPORT
+                    </span>
+
+                    <h2>
+                        Explain the trade-offs
+                    </h2>
+
+                </div>
+
+                <button
+                    id="ai-button"
+                    class="btn btn-outline-primary btn-sm"
+                    disabled
+                >
+                    <i class="bi bi-stars"></i>
+                    Explain with Gemini
+                </button>
+
+            </div>
+
+
+            <div
+                id="ai-output"
+                class="ai-output"
+            >
+
+                <div class="ai-empty">
+
+                    <i class="bi bi-stars"></i>
+
+                    <strong>
+                        Run a scenario first
+                    </strong>
+
+                    <span>
+                        Gemini will explain why the scenario
+                        changed and highlight the trade-offs.
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+
+<script type="application/json" id="scenario-config">
+{
+    "vesselId": {{ vessel.vessel_id | tojson }},
+    "scenarioUrl": {{ url_for(
+        "scenario.scenario_api",
+        vessel_id=vessel.vessel_id
+    ) | tojson }},
+    "intelligenceUrl": {{ url_for(
+        "scenario.live_intelligence",
+        vessel_id=vessel.vessel_id
+    ) | tojson }},
+    "aiUrl": {{ url_for(
+        "scenario.ai_explanation",
+        vessel_id=vessel.vessel_id
+    ) | tojson }}
+}
+</script>
+
+<script>
+(function () {
+    const configElement = document.getElementById("scenario-config");
+
+    if (!configElement) {
+        console.error("SCENARIO_CONFIG: configuration element not found.");
+        window.SCENARIO_CONFIG = {};
+        return;
+    }
+
+    try {
+        window.SCENARIO_CONFIG = JSON.parse(
+            configElement.textContent.trim()
+        );
+
+        console.log(
+            "SCENARIO_CONFIG loaded:",
+            window.SCENARIO_CONFIG
+        );
+    } catch (error) {
+        console.error(
+            "SCENARIO_CONFIG: failed to parse configuration.",
+            error
+        );
+
+        window.SCENARIO_CONFIG = {};
+    }
+})();
+</script>
+
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/scenario.js'
+    ) }}">
+</script>
+
+{% endblock %}

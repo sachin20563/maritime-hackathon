@@ -1,20 +1,146 @@
-<nav class="navbar navbar-expand-lg navbar-dark sticky-top app-navbar" aria-label="Main navigation">
-  <div class="container-fluid px-lg-5">
-    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
-      <span class="brand-mark"><i class="bi bi-compass-fill"></i></span>
-      <span>VECXUS <small>VECTOR NEXUS</small></span>
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="mainNav">
-      <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2">
-        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">Home</a></li>
-        <li class="nav-item"><a class="nav-link {% if request.endpoint in ['fleet_dashboard', 'vessel_detail'] %}active{% endif %}" href="{{ url_for('fleet_dashboard') }}">Fleet Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link disabled" href="#">Scenarios</a></li>
-        <li class="nav-item"><a class="nav-link disabled" href="#">Data</a></li>
-      </ul>
-      <span class="navbar-text small">Hackathon prototype</span>
+<nav
+    class="navbar navbar-expand-lg navbar-dark sticky-top app-navbar"
+    aria-label="Main navigation"
+>
+
+    <div class="container-fluid px-lg-5">
+
+        <!-- BRAND -->
+
+        <a
+            class="navbar-brand d-flex align-items-center gap-2"
+            href="{{ url_for('index') }}"
+        >
+
+            <span class="brand-mark">
+                <i class="bi bi-compass-fill"></i>
+            </span>
+
+            <span>
+                VECXUS
+                <small>VECTOR NEXUS</small>
+            </span>
+
+        </a>
+
+
+        <!-- MOBILE MENU -->
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#mainNav"
+            aria-controls="mainNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+        >
+
+            <span class="navbar-toggler-icon"></span>
+
+        </button>
+
+
+        <!-- NAVIGATION -->
+
+        <div
+            class="collapse navbar-collapse"
+            id="mainNav"
+        >
+
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2">
+
+
+                <!-- HOME -->
+
+                <li class="nav-item">
+
+                    <a
+                        class="nav-link
+                        {% if request.endpoint == 'index' %}
+                            active
+                        {% endif %}"
+                        href="{{ url_for('index') }}"
+                    >
+
+                        Home
+
+                    </a>
+
+                </li>
+
+
+                <!-- FLEET DASHBOARD -->
+
+                <li class="nav-item">
+
+                    <a
+                        class="nav-link
+                        {% if request.endpoint in ['fleet_dashboard', 'vessel_detail'] %}
+                            active
+                        {% endif %}"
+                        href="{{ url_for('fleet_dashboard') }}"
+                    >
+
+                        <i class="bi bi-ship me-1"></i>
+
+                        Fleet Dashboard
+
+                    </a>
+
+                </li>
+
+
+                <!-- VOYAGE SCENARIOS -->
+
+                <li class="nav-item">
+
+                    <a
+                        class="nav-link
+                        {% if request.endpoint == 'scenario.scenarios_page' %}
+                            active
+                        {% endif %}"
+                        href="{{ url_for('scenario.scenarios_page') }}"
+                    >
+
+                        <i class="bi bi-diagram-3 me-1"></i>
+
+                        Voyage Scenarios
+
+                    </a>
+
+                </li>
+
+
+                <!-- AI INSIGHTS -->
+
+                <li class="nav-item">
+
+                    <a
+                        class="nav-link
+                        {% if request.endpoint == 'scenario.portfolio_page' %}
+                            active
+                        {% endif %}"
+                        href="{{ url_for('scenario.portfolio_page') }}"
+                    >
+
+                        <i class="bi bi-stars me-1"></i>
+
+                        AI Insights
+
+                    </a>
+
+                </li>
+
+            </ul>
+
+
+            <span class="navbar-text small">
+                Hackathon prototype
+            </span>
+
+        </div>
+
     </div>
-  </div>
+
 </nav>

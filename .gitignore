@@ -219,3 +219,5 @@ __marimo__/
 *.pyc
 .DS_Store
 AGENTS.md
+
+.env

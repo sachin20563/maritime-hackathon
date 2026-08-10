@@ -1,0 +1,651 @@
+{% extends "base.html" %}
+
+{% block title %}Voyage Scenario Analysis · VECXUS{% endblock %}
+
+{% block content %}
+
+<style>
+
+.scenario-landing {
+    min-height: calc(100vh - 80px);
+    background: #f4f6f8;
+    padding: 55px 0 80px;
+}
+
+.scenario-hero {
+    margin-bottom: 38px;
+}
+
+.scenario-eyebrow {
+    display: block;
+    color: #c62828;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.scenario-hero h1 {
+    color: #17233b;
+    font-size: clamp(38px, 5vw, 62px);
+    font-weight: 700;
+    line-height: 1.05;
+    margin-bottom: 15px;
+}
+
+.scenario-hero p {
+    color: #617086;
+    font-size: 18px;
+    max-width: 850px;
+}
+
+.scenario-selector-card {
+    background: white;
+    border: 1px solid #e4e9ef;
+    border-radius: 14px;
+    padding: 34px;
+    box-shadow: 0 5px 20px rgba(23, 35, 59, 0.06);
+}
+
+.selector-title {
+    color: #17233b;
+    font-size: 30px;
+    font-weight: 600;
+    margin-bottom: 7px;
+}
+
+.selector-subtitle {
+    color: #68778b;
+    margin-bottom: 30px;
+}
+
+.vessel-select-wrapper {
+    position: relative;
+}
+
+.vessel-select {
+    width: 100%;
+    min-height: 68px;
+    padding: 12px 55px 12px 20px;
+    border: 1px solid #ccd6e1;
+    border-radius: 10px;
+    background: #f8fafc;
+    color: #17233b;
+    font-size: 17px;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+}
+
+.vessel-select:focus {
+    border-color: #4d86b8;
+    box-shadow: 0 0 0 3px rgba(77, 134, 184, 0.12);
+}
+
+.select-arrow {
+    position: absolute;
+    right: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #617086;
+    font-size: 20px;
+}
+
+.vessel-preview {
+    display: none;
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #f5f8fb;
+    border: 1px solid #e0e7ef;
+}
+
+.vessel-preview.show {
+    display: block;
+}
+
+.vessel-preview-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 15px;
+}
+
+.vessel-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: #eaf1f7;
+    color: #356789;
+    font-size: 21px;
+}
+
+.vessel-name {
+    font-size: 19px;
+    font-weight: 650;
+    color: #17233b;
+}
+
+.vessel-id {
+    font-size: 13px;
+    color: #8290a2;
+}
+
+.vessel-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.detail-item {
+    background: white;
+    border-radius: 8px;
+    padding: 14px;
+}
+
+.detail-label {
+    display: block;
+    color: #8290a2;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 5px;
+}
+
+.detail-value {
+    color: #17233b;
+    font-weight: 600;
+}
+
+.open-scenario-btn {
+    margin-top: 25px;
+    width: 100%;
+    min-height: 54px;
+    border: none;
+    border-radius: 9px;
+    background: #17233b;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.open-scenario-btn:hover {
+    background: #243858;
+    transform: translateY(-1px);
+}
+
+.open-scenario-btn:disabled {
+    background: #b7c1cc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.features-row {
+    margin-top: 35px;
+}
+
+.feature-card {
+    height: 100%;
+    background: white;
+    border: 1px solid #e4e9ef;
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.feature-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef3f8;
+    color: #315f82;
+    font-size: 19px;
+    margin-bottom: 17px;
+}
+
+.feature-card h3 {
+    font-size: 18px;
+    color: #17233b;
+    margin-bottom: 8px;
+}
+
+.feature-card p {
+    color: #718096;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.empty-state {
+    padding: 25px;
+    border-radius: 10px;
+    background: #fff8e1;
+    border: 1px solid #f1d98c;
+    color: #765b14;
+}
+
+@media (max-width: 768px) {
+
+    .scenario-landing {
+        padding: 35px 15px 60px;
+    }
+
+    .scenario-selector-card {
+        padding: 24px;
+    }
+
+    .vessel-details {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+</style>
+
+
+<section class="scenario-landing">
+
+    <div class="container">
+
+        <!-- ================================================= -->
+        <!-- HERO -->
+        <!-- ================================================= -->
+
+        <div class="scenario-hero">
+
+            <span class="scenario-eyebrow">
+                Voyage Intelligence
+            </span>
+
+            <h1>
+                Voyage Scenario Analysis
+            </h1>
+
+            <p>
+                Select a vessel to compare bunkering and routing
+                scenarios under changing operational conditions.
+            </p>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- VESSEL SELECTOR -->
+        <!-- ================================================= -->
+
+        <div class="scenario-selector-card">
+
+            <h2 class="selector-title">
+                Select a vessel
+            </h2>
+
+            <p class="selector-subtitle">
+                Choose a vessel to open its scenario workspace.
+            </p>
+
+
+            {% if vessels %}
+
+            <div class="vessel-select-wrapper">
+
+                <select
+                    id="vesselSelect"
+                    class="vessel-select"
+                >
+
+                    <option value="">
+                        Select a vessel...
+                    </option>
+
+                    {% for vessel in vessels %}
+
+                    <option
+                        value="{{ vessel.vessel_id }}"
+                        data-name="{{ vessel.get('name', vessel.get('vessel_name', vessel.vessel_id)) }}"
+                        data-route="{{ vessel.get('service_route', vessel.get('route', 'N/A')) }}"
+                        data-origin="{{ vessel.get('origin', 'N/A') }}"
+                        data-destination="{{ vessel.get('destination', 'N/A') }}"
+                        data-fuel="{{ vessel.get('primary_fuel', 'N/A') }}"
+                        data-status="{{ vessel.get('status', 'Operational') }}"
+                    >
+
+                        {{ vessel.get(
+                            'name',
+                            vessel.get(
+                                'vessel_name',
+                                vessel.vessel_id
+                            )
+                        ) }}
+
+                        ·
+
+                        {{ vessel.vessel_id }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <span class="select-arrow">
+                    <i class="bi bi-chevron-down"></i>
+                </span>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- SELECTED VESSEL PREVIEW -->
+            <!-- ================================================= -->
+
+            <div
+                id="vesselPreview"
+                class="vessel-preview"
+            >
+
+                <div class="vessel-preview-header">
+
+                    <div class="vessel-icon">
+                        <i class="bi bi-tsunami"></i>
+                    </div>
+
+                    <div>
+
+                        <div
+                            id="previewName"
+                            class="vessel-name"
+                        >
+                            Vessel
+                        </div>
+
+                        <div
+                            id="previewId"
+                            class="vessel-id"
+                        >
+                            IMO / Vessel ID
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="vessel-details">
+
+                    <div class="detail-item">
+
+                        <span class="detail-label">
+                            Route
+                        </span>
+
+                        <span
+                            id="previewRoute"
+                            class="detail-value"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-item">
+
+                        <span class="detail-label">
+                            Voyage
+                        </span>
+
+                        <span
+                            id="previewVoyage"
+                            class="detail-value"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-item">
+
+                        <span class="detail-label">
+                            Primary Fuel
+                        </span>
+
+                        <span
+                            id="previewFuel"
+                            class="detail-value"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="openScenarioBtn"
+                    class="open-scenario-btn"
+                    type="button"
+                >
+
+                    <i class="bi bi-sliders2 me-2"></i>
+
+                    Open Scenario Workspace
+
+                </button>
+
+            </div>
+
+
+            {% else %}
+
+            <div class="empty-state">
+
+                <strong>
+                    No vessels available.
+                </strong>
+
+                <div class="mt-1">
+                    Open the Fleet Dashboard to check the vessel data.
+                </div>
+
+                <a
+                    href="{{ url_for('fleet_dashboard') }}"
+                    class="btn btn-dark mt-3"
+                >
+                    Open Fleet Dashboard
+                </a>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- FEATURE EXPLANATION -->
+        <!-- ================================================= -->
+
+        <div class="row g-4 features-row">
+
+            <div class="col-md-4">
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        <i class="bi bi-cloud-sun"></i>
+                    </div>
+
+                    <h3>
+                        Live Conditions
+                    </h3>
+
+                    <p>
+                        Monitor weather, oil prices, schedules and
+                        disruption signals before evaluating a voyage.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        <i class="bi bi-diagram-3"></i>
+                    </div>
+
+                    <h3>
+                        Scenario Comparison
+                    </h3>
+
+                    <p>
+                        Compare bunkering, routing, fuel consumption,
+                        cost, time and operational risk.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        <i class="bi bi-stars"></i>
+                    </div>
+
+                    <h3>
+                        AI Decision Support
+                    </h3>
+
+                    <p>
+                        Use Gemini to explain scenario trade-offs
+                        using the structured outputs from the analysis.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const select = document.getElementById("vesselSelect");
+
+    if (!select) {
+        return;
+    }
+
+    const preview = document.getElementById("vesselPreview");
+
+    const name = document.getElementById("previewName");
+    const id = document.getElementById("previewId");
+    const route = document.getElementById("previewRoute");
+    const voyage = document.getElementById("previewVoyage");
+    const fuel = document.getElementById("previewFuel");
+
+    const openButton = document.getElementById(
+        "openScenarioBtn"
+    );
+
+
+    function updateVesselPreview() {
+
+        const option =
+            select.options[select.selectedIndex];
+
+
+        if (!select.value) {
+
+            preview.classList.remove("show");
+
+            return;
+        }
+
+
+        name.textContent =
+            option.dataset.name || "Vessel";
+
+        id.textContent =
+            "Vessel ID: " + select.value;
+
+        route.textContent =
+            option.dataset.route || "N/A";
+
+        fuel.textContent =
+            option.dataset.fuel || "N/A";
+
+
+        const origin =
+            option.dataset.origin || "N/A";
+
+        const destination =
+            option.dataset.destination || "N/A";
+
+
+        voyage.textContent =
+            origin + " → " + destination;
+
+
+        preview.classList.add("show");
+
+    }
+
+
+    select.addEventListener(
+        "change",
+        updateVesselPreview
+    );
+
+
+    openButton.addEventListener(
+        "click",
+        function () {
+
+            const vesselId =
+                select.value;
+
+
+            if (!vesselId) {
+                return;
+            }
+
+
+            window.location.href =
+                "/vessels/"
+                + encodeURIComponent(vesselId)
+                + "/scenario";
+
+        }
+    );
+
+});
+
+</script>
+
+{% endblock %}
