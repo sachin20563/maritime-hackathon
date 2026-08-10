@@ -2,6 +2,7 @@ from flask import Flask, abort, jsonify, render_template, request
 
 from config import Config
 from app.fleet_dashboard import (
+    build_assessment_context,
     build_voyage_context,
     find_vessel,
     get_fleet_dashboard_context,
@@ -39,9 +40,10 @@ def create_app(config_class=Config):
         vessel = find_vessel(vessel_id)
         if vessel is None:
             abort(404)
+        assessment = build_assessment_context(vessel, request.args)
         return render_template(
             "fleet_dashboard/vessel_detail.html",
-            voyage_context=build_voyage_context(vessel),
+            **assessment,
         )
 
     @app.get("/api/vessels/<vessel_id>/voyage-context")
