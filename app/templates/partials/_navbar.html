@@ -1,10 +1,16 @@
-<nav class="navbar navbar-expand-lg navbar-dark sticky-top app-navbar" aria-label="Main navigation">
+<nav
+    class="navbar navbar-expand-lg navbar-dark sticky-top app-navbar"
+    aria-label="Main navigation"
+>
 
     <div class="container-fluid px-lg-5">
 
-        <!-- Brand -->
-        <a class="navbar-brand d-flex align-items-center gap-2"
-           href="{{ url_for('index') }}">
+        <!-- BRAND -->
+
+        <a
+            class="navbar-brand d-flex align-items-center gap-2"
+            href="{{ url_for('index') }}"
+        >
 
             <span class="brand-mark">
                 <i class="bi bi-compass-fill"></i>
@@ -18,7 +24,8 @@
         </a>
 
 
-        <!-- Mobile menu -->
+        <!-- MOBILE MENU -->
+
         <button
             class="navbar-toggler"
             type="button"
@@ -26,24 +33,35 @@
             data-bs-target="#mainNav"
             aria-controls="mainNav"
             aria-expanded="false"
-            aria-label="Toggle navigation">
+            aria-label="Toggle navigation"
+        >
 
             <span class="navbar-toggler-icon"></span>
 
         </button>
 
 
-        <!-- Navigation -->
-        <div class="collapse navbar-collapse" id="mainNav">
+        <!-- NAVIGATION -->
+
+        <div
+            class="collapse navbar-collapse"
+            id="mainNav"
+        >
 
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2">
 
+
                 <!-- HOME -->
+
                 <li class="nav-item">
 
                     <a
-                        class="nav-link {% if request.endpoint == 'index' %}active{% endif %}"
-                        href="{{ url_for('index') }}">
+                        class="nav-link
+                        {% if request.endpoint == 'index' %}
+                            active
+                        {% endif %}"
+                        href="{{ url_for('index') }}"
+                    >
 
                         Home
 
@@ -53,24 +71,40 @@
 
 
                 <!-- FLEET DASHBOARD -->
+
                 <li class="nav-item">
 
                     <a
-                        class="nav-link {% if request.endpoint in ['fleet_dashboard', 'vessel_detail'] %}active{% endif %}"
-                        href="{{ url_for('fleet_dashboard') }}">
+                        class="nav-link
+                        {% if request.endpoint in ['fleet_dashboard', 'vessel_detail'] %}
+                            active
+                        {% endif %}"
+                        href="{{ url_for('fleet_dashboard') }}"
+                    >
+
+                        <i class="bi bi-ship me-1"></i>
 
                         Fleet Dashboard
 
                     </a>
 
-                <!-- VOYAGE SCENARIO -->
+                </li>
+
+
+                <!-- VOYAGE SCENARIOS -->
+
                 <li class="nav-item">
 
                     <a
-                        class="nav-link {% if request.endpoint in ['scenario.scenarios_page', 'scenario.scenario_page'] %}active{% endif %}"
-                        href="{{ url_for('scenario.scenarios_page') }}">
+                        class="nav-link
+                        {% if request.endpoint == 'scenario.scenarios_page' %}
+                            active
+                        {% endif %}"
+                        href="{{ url_for('scenario.scenarios_page') }}"
+                    >
 
-                        <i class="bi bi-sign-turn-slight-right me-1"></i>
+                        <i class="bi bi-diagram-3 me-1"></i>
+
                         Voyage Scenarios
 
                     </a>
@@ -79,11 +113,18 @@
 
 
                 <!-- AI INSIGHTS -->
+
                 <li class="nav-item">
 
                     <a
-                        class="nav-link {% if request.endpoint in ['scenario.portfolio_page', 'scenario.portfolio_api'] %}active{% endif %}"
-                        href="{{ url_for('scenario.portfolio_page') }}">
+                        class="nav-link
+                        {% if request.endpoint == 'scenario.portfolio_page' %}
+                            active
+                        {% endif %}"
+                        href="{{ url_for('scenario.portfolio_page') }}"
+                    >
+
+                        <i class="bi bi-stars me-1"></i>
 
                         AI Insights
 
