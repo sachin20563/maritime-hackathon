@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}
+Voyage Scenarios · VECXUS
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid px-lg-5 py-5">
+
+    <!-- HEADER -->
+    <div class="mb-4">
+
+        <span class="eyebrow">
+            VOYAGE DECISION SUPPORT
+        </span>
+
+        <h1 class="mt-2">
+            Voyage Scenario & Dynamic Risk Analysis
+        </h1>
+
+        <p class="lead text-muted">
+            Select a vessel to compare bunkering and routing
+            scenarios under changing operational conditions.
+        </p>
+
+    </div>
+
+
+    <!-- EXPLANATION -->
+    <div class="row g-4 mb-5">
+
+        <div class="col-lg-8">
+
+            <div class="card h-100 border-0 shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <h4>
+                        <i class="bi bi-diagram-3 me-2"></i>
+                        What this does
+                    </h4>
+
+                    <p class="text-muted">
+
+                        Compare alternative bunkering and routing
+                        scenarios and understand how weather,
+                        congestion, geopolitical conditions,
+                        fuel prices, port availability and delays
+                        affect the voyage.
+
+                    </p>
+
+                    <div class="row g-3 mt-2">
+
+                        <div class="col-md-4">
+
+                            <div class="p-3 rounded bg-light">
+
+                                <i class="bi bi-cloud-sun fs-4"></i>
+
+                                <div class="fw-semibold mt-2">
+                                    Live Conditions
+                                </div>
+
+                                <small class="text-muted">
+                                    Weather, news and market conditions
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-4">
+
+                            <div class="p-3 rounded bg-light">
+
+                                <i class="bi bi-fuel-pump fs-4"></i>
+
+                                <div class="fw-semibold mt-2">
+                                    Fuel Scenarios
+                                </div>
+
+                                <small class="text-muted">
+                                    Compare bunker locations and prices
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-4">
+
+                            <div class="p-3 rounded bg-light">
+
+                                <i class="bi bi-shield-exclamation fs-4"></i>
+
+                                <div class="fw-semibold mt-2">
+                                    Dynamic Risk
+                                </div>
+
+                                <small class="text-muted">
+                                    Evaluate delays and disruptions
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- AI -->
+        <div class="col-lg-4">
+
+            <div class="card h-100 border-0 shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-2 mb-3">
+
+                        <i class="bi bi-stars fs-3"></i>
+
+                        <h4 class="mb-0">
+                            AI-Assisted Analysis
+                        </h4>
+
+                    </div>
+
+                    <p class="text-muted">
+
+                        After scenarios are calculated, AI explains
+                        the differences and trade-offs between the
+                        available options.
+
+                    </p>
+
+                    <p class="small text-muted mb-0">
+
+                        AI supports the planner's decision.
+                        It does not automatically change the voyage plan.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- VESSEL SELECTION -->
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+
+            <h3 class="mb-1">
+                Select a Vessel
+            </h3>
+
+            <p class="text-muted mb-0">
+                Choose a vessel to begin scenario analysis.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        {% for vessel in vessels %}
+
+        <div class="col-md-6 col-xl-4">
+
+            <div class="card h-100 border-0 shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <!-- Vessel header -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+
+                        <div>
+
+                            <span class="text-muted small">
+                                VESSEL
+                            </span>
+
+                            <h4 class="mb-0">
+                                {{ vessel.vessel_id }}
+                            </h4>
+
+                        </div>
+
+                        <i class="bi bi-ship fs-2"></i>
+
+                    </div>
+
+
+                    <!-- Route -->
+
+                    <div class="mb-3">
+
+                        <span class="text-muted small">
+                            VOYAGE
+                        </span>
+
+                        <div class="fw-semibold">
+
+                            {{ vessel.origin }}
+
+                            <i class="bi bi-arrow-right mx-2"></i>
+
+                            {{ vessel.destination }}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Stats -->
+
+                    <div class="row g-2 mb-4">
+
+                        <div class="col-6">
+
+                            <div class="bg-light rounded p-2">
+
+                                <small class="text-muted d-block">
+                                    Fuel
+                                </small>
+
+                                <strong>
+                                    {{ vessel.current_fuel_pct }}%
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-6">
+
+                            <div class="bg-light rounded p-2">
+
+                                <small class="text-muted d-block">
+                                    Next Bunker
+                                </small>
+
+                                <strong>
+                                    {{ vessel.next_bunkering_port }}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Scenario button -->
+
+                    <a
+                        href="{{ url_for(
+                            'scenario.scenario_page',
+                            vessel_id=vessel.vessel_id
+                        ) }}"
+                        class="btn btn-primary w-100">
+
+                        <i class="bi bi-graph-up-arrow me-2"></i>
+
+                        Analyse Voyage
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% else %}
+
+        <div class="col-12">
+
+            <div class="alert alert-warning">
+
+                No vessels are currently available for scenario analysis.
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,43 +1,359 @@
 {% extends "base.html" %}
-{% block title %}Vecxus · Bunkering Strategy Optimisation{% endblock %}
+
+{% block title %}
+Vecxus · Bunkering Strategy Optimisation
+{% endblock %}
+
 
 {% block content %}
+
+<!-- ============================================================
+     HERO
+============================================================ -->
+
 <section class="hero">
-  <div class="container py-5">
-    <div class="row align-items-center g-4 py-lg-4">
-      <div class="col-lg-7">
-        <span class="eyebrow">Vector Nexus</span>
-        <h1>Make smarter vessel fuel purchasing decisions.</h1>
-        <p class="lead">Vecxus helps shipping teams explore where, when, and how much fuel to purchase using operational data.</p>
-        <a class="btn btn-light" href="{{ url_for('fleet_dashboard') }}">Open fleet dashboard</a>
-      </div>
-      <div class="col-lg-5">
-        <div class="question-card">
-          <span>Core decision</span>
-          <p>Where should a vessel bunker, when should it bunker, and how much should it purchase?</p>
+
+    <div class="container py-5">
+
+        <div class="row align-items-center g-4 py-lg-4">
+
+            <div class="col-lg-7">
+
+                <span class="eyebrow">
+                    VECTOR NEXUS
+                </span>
+
+                <h1>
+                    Make smarter vessel fuel purchasing decisions.
+                </h1>
+
+                <p class="lead">
+                    Vecxus helps shipping teams explore where, when,
+                    and how much fuel to purchase using operational,
+                    market and voyage data.
+                </p>
+
+                <div class="d-flex flex-wrap gap-3">
+
+                    <a
+                        class="btn btn-light"
+                        href="{{ url_for('fleet_dashboard') }}">
+
+                        <i class="bi bi-grid-3x3-gap me-2"></i>
+                        Open Fleet Dashboard
+
+                    </a>
+
+                    <a
+                        class="btn btn-outline-light"
+                        href="{{ url_for('scenario.portfolio_page') }}">
+
+                        <i class="bi bi-stars me-2"></i>
+                        AI Portfolio Insights
+
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-5">
+
+                <div class="question-card">
+
+                    <span>
+                        CORE DECISION
+                    </span>
+
+                    <p>
+                        Where should a vessel bunker,
+                        when should it bunker,
+                        and how much should it purchase?
+                    </p>
+
+                </div>
+
+            </div>
+
         </div>
-      </div>
+
     </div>
-  </div>
+
 </section>
 
+
+
+<!-- ============================================================
+     DECISION SUPPORT MODULES
+============================================================ -->
+
 <section class="container py-5" id="modules">
-  <div class="section-heading">
-    <span>Project skeleton</span>
-    <h2>Feature areas for the team</h2>
-    <p>These placeholders can grow into separate pages as the prototype develops.</p>
-  </div>
-  <div class="row g-4 mt-1">
-    {% for icon, title, copy in [
-      ('fuel-pump', 'Fuel market data', 'Compare bunker prices and availability across ports.'),
-      ('ship', 'Vessel & voyage', 'Model consumption, routes, schedules, and constraints.'),
-      ('sliders', 'Optimisation', 'Recommend where, when, and how much fuel to purchase.'),
-      ('bezier2', 'Scenario testing', 'Explore price changes, route changes, and delays.')
-    ] %}
-    <div class="col-md-6 col-xl-3">
-      <article class="module-card h-100"><i class="bi bi-{{ icon }}"></i><h3>{{ title }}</h3><p>{{ copy }}</p><span class="placeholder-label">Feature placeholder</span></article>
+
+    <div class="section-heading">
+
+        <span>
+            DECISION SUPPORT
+        </span>
+
+        <h2>
+            From fleet monitoring to intelligent voyage decisions
+        </h2>
+
+        <p>
+            Vecxus combines fleet data, live external conditions,
+            scenario analysis and AI-assisted insights to support
+            bunker planning decisions.
+        </p>
+
     </div>
-    {% endfor %}
-  </div>
+
+
+    <div class="row g-4 mt-1">
+
+
+        <!-- FLEET DASHBOARD -->
+
+        <div class="col-md-6 col-xl-3">
+
+            <article class="module-card h-100">
+
+                <i class="bi bi-fuel-pump"></i>
+
+                <h3>
+                    Fleet Overview
+                </h3>
+
+                <p>
+                    Monitor vessels, fuel levels, bunkering needs,
+                    fuel exposure and operational risks across the fleet.
+                </p>
+
+                <a
+                    href="{{ url_for('fleet_dashboard') }}"
+                    class="btn btn-sm btn-outline-primary">
+
+                    View Fleet
+
+                </a>
+
+            </article>
+
+        </div>
+
+
+        <!-- VOYAGE SCENARIO -->
+
+        <div class="col-md-6 col-xl-3">
+
+            <article class="module-card h-100">
+
+                <i class="bi bi-sign-turn-slight-right"></i>
+
+                <h3>
+                    Voyage Scenarios
+                </h3>
+
+                <p>
+                    Compare bunkering and routing scenarios under
+                    changing weather, congestion, fuel prices and
+                    operational conditions.
+                </p>
+
+                <a
+                    href="{{ url_for('fleet_dashboard') }}"
+                    class="btn btn-sm btn-outline-primary">
+
+                    Select Vessel
+
+                </a>
+
+            </article>
+
+        </div>
+
+
+        <!-- SUSTAINABILITY -->
+
+        <div class="col-md-6 col-xl-3">
+
+            <article class="module-card h-100">
+
+                <i class="bi bi-leaf"></i>
+
+                <h3>
+                    Sustainability
+                </h3>
+
+                <p>
+                    Evaluate fuel consumption, emissions,
+                    fuel compatibility and sustainability
+                    considerations for each vessel.
+                </p>
+
+                <a
+                    href="{{ url_for('fleet_dashboard') }}"
+                    class="btn btn-sm btn-outline-primary">
+
+                    View Fleet
+
+                </a>
+
+            </article>
+
+        </div>
+
+
+        <!-- AI INSIGHTS -->
+
+        <div class="col-md-6 col-xl-3">
+
+            <article class="module-card h-100">
+
+                <i class="bi bi-stars"></i>
+
+                <h3>
+                    AI Portfolio Insights
+                </h3>
+
+                <p>
+                    Convert fleet and voyage analysis into
+                    understandable explanations, trends,
+                    opportunities and decision trade-offs.
+                </p>
+
+                <a
+                    href="{{ url_for('scenario.portfolio_page') }}"
+                    class="btn btn-sm btn-outline-primary">
+
+                    Open AI Insights
+
+                </a>
+
+            </article>
+
+        </div>
+
+
+    </div>
+
 </section>
+
+
+
+<!-- ============================================================
+     HOW IT WORKS
+============================================================ -->
+
+<section class="container pb-5">
+
+    <div class="section-heading">
+
+        <span>
+            DECISION FLOW
+        </span>
+
+        <h2>
+            From vessel selection to informed action
+        </h2>
+
+    </div>
+
+
+    <div class="row g-4">
+
+
+        <div class="col-md-3">
+
+            <div class="module-card h-100">
+
+                <span class="eyebrow">
+                    01
+                </span>
+
+                <h3>
+                    Identify
+                </h3>
+
+                <p>
+                    Identify vessels with upcoming bunkering
+                    requirements, low reserves or elevated risk.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <div class="module-card h-100">
+
+                <span class="eyebrow">
+                    02
+                </span>
+
+                <h3>
+                    Simulate
+                </h3>
+
+                <p>
+                    Test different bunkering and routing scenarios
+                    against changing operational conditions.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <div class="module-card h-100">
+
+                <span class="eyebrow">
+                    03
+                </span>
+
+                <h3>
+                    Compare
+                </h3>
+
+                <p>
+                    Compare cost, travel time, fuel consumption,
+                    risk and sustainability implications.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <div class="module-card h-100">
+
+                <span class="eyebrow">
+                    04
+                </span>
+
+                <h3>
+                    Decide
+                </h3>
+
+                <p>
+                    Use AI-generated explanations and portfolio
+                    insights to support the planner's final decision.
+                </p>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
 {% endblock %}
