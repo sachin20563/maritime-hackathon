@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Fleet Dashboard · Vecxus{% endblock %}
+
+{% block content %}
+<header class="dashboard-header">
+  <div class="container-fluid px-lg-5 py-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+      <div>
+        <span class="eyebrow">Fleet intelligence</span>
+        <h1 class="h2 mt-2 mb-2">PIL Fleet & Bunkering Overview</h1>
+        <p class="mb-0">Fleet-wide visibility of upcoming bunkering requirements, projected fuel exposure, voyage status and areas requiring planner attention.</p>
+      </div>
+      <div class="data-note align-self-lg-start"><i class="bi bi-database"></i><div><strong>Official vessel identities</strong><span>Operational values simulated · {{ data_timestamp }}</span></div></div>
+    </div>
+  </div>
+</header>
+
+<div class="container-fluid px-lg-5 py-4">
+  <section class="attention-overview" aria-label="Immediate fleet attention">
+    <div class="attention-title"><span class="attention-pulse"></span><div><span>Attention now</span><strong>{{ kpis.requiring_review }} voyage{% if kpis.requiring_review != 1 %}s{% endif %} require planner review</strong></div></div>
+    <div class="attention-metrics">
+      <a href="{{ url_for('fleet_dashboard', status='Review') }}"><strong>{{ kpis.requiring_review }}</strong><span>Requires review</span></a>
+      <a href="{{ url_for('fleet_dashboard', risk_level='High') }}"><strong>{{ vessels|selectattr('risk_level', 'equalto', 'High')|list|length }}</strong><span>High risk</span></a>
+      <div><strong>{{ kpis.low_fuel_reserve }}</strong><span>Low reserve</span></div>
+      <div><strong>{{ kpis.upcoming_bunkering }}</strong><span>Upcoming bunker</span></div>
+    </div>
+  </section>
+  <section class="fleet-context" aria-label="Fleet context">
+    <span><i class="bi bi-ship"></i><strong>{{ kpis.monitored_vessels }}</strong> monitored vessels</span>
+    <span><i class="bi bi-cash-stack"></i><strong>${{ '{:,.0f}'.format(kpis.projected_bunker_spend) }}</strong> projected spend</span>
+    <span><i class="bi bi-cloud-haze2"></i><strong>{{ '{:,.0f}'.format(kpis.estimated_emissions) }} tCO₂e</strong> estimated emissions</span>
+  </section>
+
+  <section class="filter-panel mt-4" aria-labelledby="filters-heading">
+    <form method="get" action="{{ url_for('fleet_dashboard') }}">
+      <div class="d-flex justify-content-between align-items-center mb-3"><h2 id="filters-heading" class="h6 mb-0">Filter monitored voyages</h2><a href="{{ url_for('fleet_dashboard') }}" class="small link-secondary">Reset filters</a></div>
+      <div class="row g-2">
+        <div class="col-md-6 col-xl-3"><label class="visually-hidden" for="search">Vessel search</label><div class="input-group"><span class="input-group-text"><i class="bi bi-search"></i></span><input class="form-control" id="search" name="search" value="{{ filters.search }}" placeholder="Search vessel name"></div></div>
+        {% for name, label, options in [
+          ('fuel_type', 'Fuel type', filter_options.fuel_types), ('status', 'Status', filter_options.statuses),
+          ('risk_level', 'Risk level', filter_options.risks), ('next_bunkering_port', 'Bunkering port', filter_options.ports),
+          ('route', 'Route', filter_options.routes)
+        ] %}
+        <div class="col-6 col-md-3 col-xl"><label class="visually-hidden" for="{{ name }}">{{ label }}</label><select class="form-select" id="{{ name }}" name="{{ name }}"><option value="">All {{ label|lower }}s</option>{% for option in options %}<option value="{{ option }}" {% if filters[name] == option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select></div>
+        {% endfor %}
+        <div class="col-6 col-md-3 col-xl-auto"><button class="btn btn-primary w-100" type="submit"><i class="bi bi-funnel me-1"></i>Apply</button></div>
+      </div>
+    </form>
+  </section>
+
+  <section class="fleet-panel mt-4" aria-labelledby="fleet-table-heading">
+    <div class="panel-heading"><div><span class="section-kicker">Fleet watchlist</span><h2 id="fleet-table-heading" class="h5 mb-0">Monitored vessels and voyages</h2></div><span class="text-secondary small">{{ vessels|length }} record{% if vessels|length != 1 %}s{% endif %}</span></div>
+    <div class="table-responsive">
+      <table class="table fleet-table align-middle mb-0">
+        <thead><tr><th>Vessel & Route</th><th>Fuel Position</th><th>Bunkering Plan</th><th>Risk</th><th>Emissions</th><th>Attention</th><th><span class="visually-hidden">Action</span></th></tr></thead>
+        <tbody>
+        {% for vessel in vessels %}
+          <tr class="priority-row priority-{{ vessel.status|lower }}">
+            <td><strong>{{ vessel.vessel_name }}</strong><small>{{ vessel.vessel_class }} · {{ '{:,}'.format(vessel.nominal_teu) }} TEU</small><small>{{ vessel.origin }} <i class="bi bi-arrow-right"></i> {{ vessel.destination }} · ETA {{ vessel.eta }}</small></td>
+            <td><div class="d-flex justify-content-between gap-3"><span><strong>{{ vessel.current_fuel_percentage }}%</strong><small>current · {{ vessel.fuel_type }}</small></span><span><strong>{{ '{:,.0f}'.format(vessel.projected_fuel_on_arrival_tonnes) }} t</strong><small class="{% if vessel.low_fuel_reserve %}text-danger fw-bold{% endif %}">{{ '{:+,.0f}'.format(vessel.reserve_margin_tonnes) }} t reserve margin</small></span></div><div class="fuel-progress mt-2"><span style="width: {{ vessel.current_fuel_percentage }}%"></span></div></td>
+            <td><strong>{{ vessel.next_bunkering_port }} · {{ '{:,.0f}'.format(vessel.projected_bunker_quantity_tonnes) }} t</strong><small>${{ '{:,.0f}'.format(vessel.projected_bunker_cost) }} projected</small></td>
+            <td><span class="badge badge-risk-{{ vessel.risk_level|lower }}">{% if vessel.risk_level == 'High' %}<i class="bi bi-exclamation-triangle-fill me-1"></i>{% endif %}{{ vessel.risk_level }}</span></td>
+            <td><strong>{{ '{:,.0f}'.format(vessel.estimated_emissions_tco2e) }} tCO₂e</strong><small>{{ vessel.sustainability_indicator }}</small></td>
+            <td class="attention-cell"><span class="badge badge-status-{{ vessel.status|lower }}">{{ 'Requires Review' if vessel.status == 'Review' else vessel.status }}</span><small>{{ vessel.attention_reasons|join(' · ') }}</small></td>
+            <td><a class="btn btn-sm btn-outline-primary text-nowrap" href="{{ url_for('vessel_detail', vessel_id=vessel.vessel_id) }}">View Voyage</a></td>
+          </tr>
+        {% else %}
+          <tr><td colspan="7"><div class="empty-table"><i class="bi bi-search"></i><strong>No vessels match these filters</strong><span>Adjust or reset the filters to view monitored voyages.</span></div></td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <p class="decision-note"><i class="bi bi-info-circle"></i> Statuses flag planner attention under prototype rules. They do not represent an operational decision or instruction.</p>
+</div>
+{% endblock %}

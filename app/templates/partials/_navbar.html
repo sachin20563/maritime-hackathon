@@ -10,7 +10,7 @@
     <div class="collapse navbar-collapse" id="mainNav">
       <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2">
         <li class="nav-item"><a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">Home</a></li>
-        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'workspace' %}active{% endif %}" href="{{ url_for('workspace') }}">Workspace</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.endpoint in ['fleet_dashboard', 'vessel_detail'] %}active{% endif %}" href="{{ url_for('fleet_dashboard') }}">Fleet Dashboard</a></li>
         <li class="nav-item"><a class="nav-link disabled" href="#">Scenarios</a></li>
         <li class="nav-item"><a class="nav-link disabled" href="#">Data</a></li>
       </ul>

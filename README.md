@@ -20,14 +20,15 @@ Open `http://127.0.0.1:5000`.
 ```text
 app/
 ├── __init__.py            # Application factory and routes
-├── workspace.py           # Workspace data and Python logic
+├── fleet_dashboard.py     # Fleet dashboard data and Python logic
 ├── static/css|js/         # Front-end assets
 └── templates/
     ├── base.html          # Shared page shell
     ├── home/
     │   └── home.html      # Homepage
-    ├── workspace/
-    │   └── workspace.html # Decision workspace page
+    ├── fleet_dashboard/
+    │   ├── fleet_dashboard.html # Fleet overview page
+    │   └── vessel_detail.html   # Vessel drill-down page
     └── partials/          # Navbar and footer
 config.py                  # Environment-aware configuration
 run.py                     # Local entry point
@@ -43,7 +44,7 @@ Routes are kept directly in `app/__init__.py` while the prototype is small. The
 starter includes:
 
 - `/` — homepage rendered from a Jinja template
-- `/workspace` — example navigable feature page
+- `/fleet-dashboard` — fleet and bunkering overview dashboard
 - `/api/example` — example JSON API route
 - `/health` — service health check
 
