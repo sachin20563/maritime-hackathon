@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
 import requests
@@ -386,6 +386,7 @@ def get_oil_price() -> dict[str, Any]:
 def get_news(
     query: str,
     page_size: int = 8,
+    route_terms: list[str] | None = None,
 ) -> dict[str, Any]:
     """
     Retrieve recent maritime / port disruption news.
@@ -412,6 +413,7 @@ def get_news(
         1,
         min(int(page_size), 20),
     )
+    route_terms = [term.strip().lower() for term in (route_terms or []) if term and term.strip()]
 
     try:
         data = _request(
@@ -419,9 +421,11 @@ def get_news(
             "https://newsapi.org/v2/everything",
             params={
                 "q": query,
+                "searchIn": "title,description",
                 "language": "en",
-                "sortBy": "publishedAt",
-                "pageSize": page_size,
+                "sortBy": "relevancy",
+                "from": (datetime.now(timezone.utc) - timedelta(days=30)).date().isoformat(),
+                "pageSize": min(page_size * 3, 50),
             },
             headers={
                 "X-Api-Key": key,
@@ -439,6 +443,15 @@ def get_news(
         }
 
     articles: list[dict[str, Any]] = []
+    maritime_terms = {
+        "shipping", "maritime", "vessel", "ship", "port", "bunker",
+        "container", "freight", "strait", "terminal", "seafarer",
+    }
+    disruption_terms = {
+        "disruption", "congestion", "closure", "closed", "strike",
+        "sanction", "conflict", "attack", "piracy", "storm", "typhoon",
+        "delay", "diversion", "reroute", "shortage", "restriction",
+    }
 
     for article in data.get("articles", []):
         if not isinstance(article, dict):
@@ -446,26 +459,39 @@ def get_news(
 
         source = article.get("source") or {}
 
-        articles.append(
-            {
-                "title": article.get("title"),
-                "description": article.get("description"),
-                "url": article.get("url"),
-                "source": source.get("name"),
-                "published_at": article.get("publishedAt"),
-                "author": article.get("author"),
-                "image_url": article.get("urlToImage"),
-            }
-        )
+        title = str(article.get("title") or "")
+        description = str(article.get("description") or "")
+        searchable = f"{title} {description}".lower()
+        matched_routes = [term for term in route_terms if term in searchable]
+        matched_maritime = sorted(term for term in maritime_terms if term in searchable)
+        matched_disruptions = sorted(term for term in disruption_terms if term in searchable)
+        if not matched_routes or not matched_maritime or not matched_disruptions:
+            continue
+        score = min(100, 45 + len(matched_routes) * 15 + len(matched_disruptions) * 8 + len(matched_maritime) * 4)
+        articles.append({
+            "title": title,
+            "description": description,
+            "url": article.get("url"),
+            "source": source.get("name"),
+            "published_at": article.get("publishedAt"),
+            "author": article.get("author"),
+            "image_url": article.get("urlToImage"),
+            "relevance_score": score,
+            "matched_route_terms": matched_routes,
+            "matched_disruption_terms": matched_disruptions,
+        })
+
+    articles.sort(key=lambda article: (article["relevance_score"], article.get("published_at") or ""), reverse=True)
+    articles = articles[:page_size]
 
     return {
         "available": True,
-        "total_results": data.get(
-            "totalResults",
-            len(articles),
-        ),
+        "total_results": len(articles),
+        "provider_total_results": data.get("totalResults", 0),
         "articles": articles,
         "source": "NewsAPI",
+        "relevance_filtered": True,
+        "lookback_days": 30,
     }
 
 
@@ -866,13 +892,10 @@ def get_gemini_explanation(
 
     model = os.getenv(
         "GEMINI_MODEL",
-        "gemini-2.5-flash",
+        "gemini-3.6-flash",
     ).strip()
 
-    url = (
-        "https://generativelanguage.googleapis.com"
-        f"/v1beta/models/{model}:generateContent"
-    )
+    url = "https://generativelanguage.googleapis.com/v1beta/interactions"
 
     system_instruction = """
 You are the explainability layer of a maritime
@@ -925,44 +948,23 @@ Each value can be:
         ) from exc
 
     body = {
-        "system_instruction": {
-            "parts": [
-                {
-                    "text": system_instruction
-                }
-            ]
-        },
-
-        "contents": [
-            {
-                "role": "user",
-                "parts": [
-                    {
-                        "text": (
-                            "Explain the following structured "
-                            "maritime scenario data:\n\n"
-                            + payload_text
-                        )
-                    }
-                ],
-            }
-        ],
-
-        "generationConfig": {
-            "temperature": 0.2,
-            "responseMimeType": "application/json",
-        },
+        "model": model,
+        "system_instruction": system_instruction,
+        "input": (
+            "Explain the following structured maritime scenario data. "
+            "Return only the requested JSON object:\n\n" + payload_text
+        ),
+        "store": False,
     }
 
     try:
         data = _request(
             "POST",
             url,
-            params={
-                "key": key,
-            },
             headers={
                 "Content-Type": "application/json",
+                "x-goog-api-key": key,
+                "Api-Revision": "2026-05-20",
             },
             json_body=body,
         )
@@ -980,39 +982,28 @@ Each value can be:
 
     try:
 
-        candidates = data.get(
-            "candidates",
-            [],
-        )
+        text_blocks: list[str] = []
+        for step in data.get("steps", []):
+            if step.get("type") != "model_output":
+                continue
+            content = step.get("content", [])
+            if isinstance(content, str):
+                text_blocks.append(content)
+                continue
+            for block in content if isinstance(content, list) else []:
+                if isinstance(block, dict) and block.get("type") == "text" and block.get("text"):
+                    text_blocks.append(block["text"])
 
-        if not candidates:
-            raise ValueError(
-                "Gemini returned no candidates"
-            )
+        # Supports the short-lived legacy Interactions response during rollout.
+        for output in data.get("outputs", []):
+            if isinstance(output, dict) and output.get("text"):
+                text_blocks.append(output["text"])
 
-        content = candidates[0].get(
-            "content",
-            {},
-        )
-
-        parts = content.get(
-            "parts",
-            [],
-        )
-
-        if not parts:
-            raise ValueError(
-                "Gemini returned no content parts"
-            )
-
-        text = parts[0].get(
-            "text",
-            "",
-        )
+        text = "\n".join(text_blocks).strip()
 
         if not text:
             raise ValueError(
-                "Gemini returned empty text"
+                "Gemini returned no model output text"
             )
 
         # Gemini may occasionally wrap JSON in markdown.
@@ -1128,7 +1119,7 @@ def get_api_status() -> dict[str, Any]:
 
             "model": os.getenv(
                 "GEMINI_MODEL",
-                "gemini-2.5-flash",
+                "gemini-3.6-flash",
             ),
         },
 

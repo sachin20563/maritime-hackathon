@@ -60,7 +60,9 @@
   let portfolio;
 
   try {
-    portfolio = await fetch("{{ url_for('scenario.portfolio_api') }}").then(r => r.json());
+    const response = await fetch("{{ url_for('scenario.portfolio_api') }}", {cache: "no-store"});
+    portfolio = await response.json();
+    if (!response.ok) throw new Error(portfolio.error || `Portfolio API returned HTTP ${response.status}`);
 
     $("fleet-size").textContent = portfolio.fleet_size;
     $("high-risk").textContent = portfolio.high_risk_vessels.length;
@@ -85,7 +87,8 @@
     $("portfolio-loading").style.display = "none";
     $("portfolio").style.display = "block";
   } catch (e) {
-    $("portfolio-loading").textContent = "Unable to load portfolio data.";
+    $("portfolio-loading").className = "alert alert-warning border";
+    $("portfolio-loading").textContent = `Unable to load portfolio data: ${e.message}`;
   }
 
   $("portfolio-ai").addEventListener("click", async () => {

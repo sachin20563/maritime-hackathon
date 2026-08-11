@@ -7,9 +7,8 @@ from flask import Blueprint, jsonify, render_template, request
 
 from app.scenario_engine import (
     build_portfolio_snapshot,
-    get_port_unlocode,
     run_scenario,
-    PORT_COORDINATES,
+    scenario_page_context,
 )
 
 from app.services.external_apis import (
@@ -17,9 +16,6 @@ from app.services.external_apis import (
     get_gemini_explanation,
     get_news,
     get_oil_price,
-    get_schedule_context,
-    get_weather,
-    weather_severity,
 )
 
 from app.fleet_dashboard import (
@@ -85,6 +81,7 @@ def scenario_page(vessel_id):
     return render_template(
         "scenario_analysis/scenario.html",
         vessel=vessel,
+        **scenario_page_context(vessel),
     )
 
 
@@ -147,55 +144,22 @@ def live_intelligence(vessel_id):
         }), 404
 
     # --------------------------------------------------------
-    # WEATHER
+    # WEATHER (explicit prototype assumption for the hackathon workspace)
     # --------------------------------------------------------
 
     weather = {
-        "available": False,
-        "error": "Weather data unavailable",
+        "available": True,
+        "description": "Overcast maritime conditions",
+        "wind_speed_knots": 14,
+        "mocked": True,
+        "source": "Prototype assumption",
     }
-
     weather_level = {
-        "level": "Unknown",
-        "score": 0,
-        "reasons": [],
+        "level": "Moderate",
+        "score": 2,
+        "reasons": ["Simulated overcast conditions", "Simulated 14-knot winds"],
+        "mocked": True,
     }
-
-    try:
-        port_name = vessel.get(
-            "next_bunkering_port",
-            "Singapore"
-        )
-
-        coords = PORT_COORDINATES.get(port_name)
-
-        if coords:
-            weather = get_weather(
-                coords["lat"],
-                coords["lng"]
-            )
-
-            weather_level = weather_severity(
-                weather
-            )
-
-        else:
-            weather = {
-                "available": False,
-                "error": f"No coordinates configured for {port_name}",
-            }
-
-    except ExternalAPIError as exc:
-        weather = {
-            "available": False,
-            "error": str(exc),
-        }
-
-    except Exception as exc:
-        weather = {
-            "available": False,
-            "error": str(exc),
-        }
 
 
     # --------------------------------------------------------
@@ -233,15 +197,22 @@ def live_intelligence(vessel_id):
         "error": "News data unavailable",
     }
 
+    route_terms = [
+        vessel.get("origin", ""),
+        vessel.get("destination", ""),
+        vessel.get("next_bunkering_port", ""),
+        "Red Sea",
+    ]
+    locations = " OR ".join(f'"{term}"' for term in route_terms if term)
     query = (
-        f'"{vessel.get("origin", "")}" OR '
-        f'"{vessel.get("destination", "")}" OR '
-        f'"{vessel.get("next_bunkering_port", "")}" '
-        f'shipping port disruption'
+        f"({locations}) AND "
+        "(shipping OR maritime OR vessel OR port OR container) AND "
+        "(disruption OR congestion OR closure OR strike OR sanctions OR conflict OR "
+        "attack OR piracy OR storm OR typhoon OR delay OR diversion OR shortage)"
     )
 
     try:
-        news = get_news(query)
+        news = get_news(query, route_terms=route_terms)
 
     except ExternalAPIError as exc:
         news = {
@@ -254,48 +225,6 @@ def live_intelligence(vessel_id):
         news = {
             "available": False,
             "articles": [],
-            "error": str(exc),
-        }
-
-
-    # --------------------------------------------------------
-    # SCHEDULE
-    # --------------------------------------------------------
-
-    schedule = {
-        "available": False,
-        "error": "Schedule API unavailable",
-    }
-
-    try:
-        origin_code = get_port_unlocode(
-            vessel.get("origin", "")
-        )
-
-        destination_code = get_port_unlocode(
-            vessel.get("destination", "")
-        )
-
-        bunker_code = get_port_unlocode(
-            vessel.get("next_bunkering_port", "")
-        )
-
-        schedule = get_schedule_context(
-            vessel,
-            origin_code,
-            destination_code,
-            bunker_code,
-        )
-
-    except ExternalAPIError as exc:
-        schedule = {
-            "available": False,
-            "error": str(exc),
-        }
-
-    except Exception as exc:
-        schedule = {
-            "available": False,
             "error": str(exc),
         }
 
@@ -309,7 +238,6 @@ def live_intelligence(vessel_id):
         "weather_severity": weather_level,
         "oil": oil,
         "news": news,
-        "schedule": schedule,
     })
 
 
